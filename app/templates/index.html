@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Telemetry Anomalies</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <h1>Telemetry Anomalies</h1>
+    <p class="small">Total rows: {{ stats.total }} — Anomalies: {{ stats.n_anomalies }} ({{ stats.anomaly_pct }}%)</p>
+
+    {% if rows %}
+      <table>
+        <thead>
+          <tr>
+            <th>timestamp</th>
+            <th>flight_id</th>
+            <th>lat</th>
+            <th>lon</th>
+            <th>altitude</th>
+            <th>speed</th>
+            <th>heading</th>
+            <th>anomaly_score</th>
+            <th>model_is_anomaly</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr class="{% if r.get('model_is_anomaly') == 1 %}anomaly{% endif %}">
+              <td>{{ r.get('timestamp') }}</td>
+              <td>{{ r.get('flight_id') }}</td>
+              <td>{{ r.get('lat') }}</td>
+              <td>{{ r.get('lon') }}</td>
+              <td>{{ r.get('altitude') }}</td>
+              <td>{{ r.get('speed') }}</td>
+              <td>{{ r.get('heading') }}</td>
+              <td>{{ r.get('anomaly_score') }}</td>
+              <td>{{ r.get('model_is_anomaly') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No telemetry available. Run the pipeline to populate data.</p>
+    {% endif %}
+  </body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Intel Telemetry Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { margin-bottom: 0; }
+        .stats { margin: 10px 0 20px 0; }
+        table { border-collapse: collapse; width: 100%; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 4px 6px; text-align: center; }
+        th { background-color: #f4f4f4; position: sticky; top: 0; }
+        tr:nth-child(even) { background-color: #fafafa; }
+        .anomaly { background-color: #ffe5e5; }
+    </style>
+</head>
+<body>
+    <h1>Intel Telemetry Dashboard</h1>
+    <div class="stats">
+        <strong>Total rows:</strong> {{ total }} |
+        <strong>Model anomalies:</strong> {{ num_anomalies }} ({{ anomaly_pct }}%)
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Flight</th>
+                <th>Lat</th>
+                <th>Lon</th>
+                <th>Alt</th>
+                <th>Speed</th>
+                <th>Heading</th>
+                <th>Status</th>
+                <th>Speed Δ</th>
+                <th>Alt Δ</th>
+                <th>Score</th>
+                <th>Model Anom?</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in rows %}
+            <tr class="{% if row.model_is_anomaly == 1 %}anomaly{% endif %}">
+                <td>{{ row.timestamp }}</td>
+                <td>{{ row.flight_id }}</td>
+                <td>{{ "%.3f" | format(row.lat) }}</td>
+                <td>{{ "%.3f" | format(row.lon) }}</td>
+                <td>{{ row.altitude }}</td>
+                <td>{{ row.speed }}</td>
+                <td>{{ row.heading }}</td>
+                <td>{{ row.status }}</td>
+                <td>{{ row.speed_diff }}</td>
+                <td>{{ row.altitude_diff }}</td>
+                <td>{{ "%.4f" | format(row.anomaly_score) }}</td>
+                <td>{{ row.model_is_anomaly }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
