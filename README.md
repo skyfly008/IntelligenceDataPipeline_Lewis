@@ -84,7 +84,7 @@ Frontend: Jinja2 templates + CSS
 
 # Intel-Style Telemetry Pipeline & Anomaly Detection
 
-[![CI](https://github.com/skyfly008/IntelligenceDataPipeline_Lewis/actions/workflows/tests.yml/badge.svg)](https://github.com/<YOUR_USERNAME>/<REPO_NAME>/actions)
+[![CI](https://github.com/skyfly008/IntelligenceDataPipeline_Lewis/actions/workflows/tests.yml/badge.svg)](https://github.com/skyfly008/IntelligenceDataPipeline_Lewis/actions)
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-API-green)](https://fastapi.tiangolo.com/)
 
@@ -142,5 +142,6 @@ Designed to look and feel like the kind of telemetry / anomaly analysis tooling 
                             |  FastAPI UI (/)   |                           | FastAPI JSON API    |
                             |  HTML Dashboard   |                           | /api/anomalies      |
                             +-------------------+                           +---------------------+
+
 
 
