@@ -18,6 +18,12 @@ Designed to resemble the kind of telemetry / anomaly tooling used in **defense, 
 
 ---
 
+##Live Demo
+
+Live deployment (Render): https://intelligencedatapipeline-lewis.onrender.com
+
+> Note: First load may take a few seconds if the free instance is waking up.
+
 ## Project Overview
 
 This project simulates an end-to-end pipeline you might see in a monitoring or intel setting:
@@ -131,4 +137,5 @@ Tests live under tests/ and cover:
 python -m pip install -r requirements.txt
 python -m pip install pytest
 pytest -q
+
 
