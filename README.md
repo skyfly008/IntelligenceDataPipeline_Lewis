@@ -12,13 +12,13 @@ A self-contained, **intelligence-style data pipeline** that:
 
 Designed to resemble the kind of telemetry / anomaly tooling used in **defense, aerospace, and national security** environments — but running entirely on synthetic data.
 
-> 🔐 **Data & Security:**  
+>  **Data & Security:**  
 > All telemetry is **fully synthetic**. No real-world or sensitive data is used.  
 > `data/*.db`, `*.csv`, and `*.parquet` are **ignored by git** and generated at runtime.
 
 ---
 
-## 🔎 Project Overview
+## Project Overview
 
 This project simulates an end-to-end pipeline you might see in a monitoring or intel setting:
 
@@ -38,7 +38,7 @@ It’s deliberately small but engineered with “real project” practices:
 
 ---
 
-## 🧱 Features
+## Features
 
 - **Synthetic telemetry generator**
   - Multiple `flight_id` values
@@ -63,7 +63,7 @@ It’s deliberately small but engineered with “real project” practices:
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ```text
 +-------------------+       +------------------+       +------------------------+
@@ -86,3 +86,4 @@ It’s deliberately small but engineered with “real project” practices:
                   |  FastAPI UI (GET /)        |                                   | FastAPI JSON API           |
                   |  HTML Dashboard + Summary  |                                   | GET /api/anomalies         |
                   +----------------------------+                                   +----------------------------+
+
