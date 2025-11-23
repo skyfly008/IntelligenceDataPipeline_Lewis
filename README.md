@@ -99,23 +99,23 @@ CI/CD: GitHub Actions
 Containerization: Docker (optional)
 
 
-### Quick Start (Windows / PowerShell)
-# 1. Create and activate a virtual environment
+## Quick Start (Windows / PowerShell)
+### 1. Create and activate a virtual environment
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
-# 2. Install dependencies
+### 2. Install dependencies
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 
-# 3. Run the data pipeline (end-to-end)
+### 3. Run the data pipeline (end-to-end)
 python run_pipeline.py
-# or step-by-step:
+### or step-by-step:
 python pipeline\ingest.py
 python pipeline\process.py
 python pipeline\model.py
 
-# 4. Launch the FastAPI app
+### 4. Launch the FastAPI app
 uvicorn app.main:app --reload
 
 Dashboard → http://127.0.0.1:8000/
@@ -127,7 +127,8 @@ Tests live under tests/ and cover:
   -test_process.py – feature engineering and ordering
   -test_model.py – anomaly model + DB table existence
   -test_app.py – FastAPI routes and responses (using TestClient)
-# In your activated venv
+### In your activated venv
 python -m pip install -r requirements.txt
 python -m pip install pytest
 pytest -q
+
