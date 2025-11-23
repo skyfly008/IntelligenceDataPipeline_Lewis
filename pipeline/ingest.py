@@ -76,6 +76,21 @@ def main(output_path: Path = RAW_CSV, n_flights: int = 5, points_per_flight: int
     logging.info("Wrote raw telemetry to %s", output_path)
 
 
+def run_ingest(num_flights: int = 20, points_per_flight: int = 50) -> Path:
+    """
+    Generate synthetic telemetry and write to data/raw_telemetry.csv.
+
+    Returns:
+        Path to the generated CSV file.
+    """
+    # Ensure data dir exists and delegate to main for generation
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    logging.info("Running ingest: %d flights, %d points per flight", num_flights, points_per_flight)
+    # Use main to keep behavior consistent (main accepts custom output_path)
+    main(output_path=RAW_CSV, n_flights=num_flights, points_per_flight=points_per_flight)
+    return RAW_CSV
+
+
 def _cli():
     import argparse
 
@@ -94,5 +109,6 @@ def _cli():
 
 
 if __name__ == "__main__":
-    _cli()
+    # When invoked as a script, run the ingest with default demo sizes
+    run_ingest()
 

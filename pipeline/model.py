@@ -48,6 +48,12 @@ def main(input_path: Path = PROCESSED_PARQUET, db_path: Path = SQLITE_DB, table_
     df.to_sql(table_name, engine, if_exists="replace", index=False)
 
 
+def run_model(input_path: Path = PROCESSED_PARQUET, db_path: Path = SQLITE_DB, table_name: str = "telemetry_anomalies", contamination: float = 0.02) -> Path:
+    """Train model on processed parquet and write scored results to SQLite. Returns the DB path."""
+    main(input_path=input_path, db_path=db_path, table_name=table_name, contamination=contamination)
+    return db_path
+
+
 def _cli():
     import argparse
 
@@ -67,40 +73,4 @@ def _cli():
 
 if __name__ == "__main__":
     _cli()
-# pipeline/model.py
-import pandas as pd
-from pathlib import Path
-from sklearn.ensemble import IsolationForest
-from sqlalchemy import create_engine
-
-DATA_DIR = Path("data")
-DB_PATH = DATA_DIR / "intel.db"
-ENGINE = create_engine(f"sqlite:///{DB_PATH}")
-
-def load_processed() -> pd.DataFrame:
-    return pd.read_parquet(DATA_DIR / "processed_telemetry.parquet")
-
-def train_and_score():
-    df = load_processed()
-
-    feature_cols = ["lat", "lon", "altitude", "speed", "heading", "speed_diff", "altitude_diff"]
-    X = df[feature_cols]
-
-    # train isolation forest
-    model = IsolationForest(n_estimators=100, contamination=0.03, random_state=42)
-    model.fit(X)
-
-    # anomaly scores: -1 = anomaly, 1 = normal
-    preds = model.predict(X)
-    scores = model.decision_function(X)
-
-    df["model_label"] = preds  # -1 or 1
-    df["anomaly_score"] = scores
-    df["model_is_anomaly"] = (df["model_label"] == -1).astype(int)
-
-    # Save to SQLite
-    df.to_sql("telemetry_anomalies", ENGINE, if_exists="replace", index=False)
-    print(f"Saved {len(df)} rows with anomaly scores to {DB_PATH}")
-
-if __name__ == "__main__":
-    train_and_score()
+ 

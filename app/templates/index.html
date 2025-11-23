@@ -8,6 +8,9 @@
   </head>
   <body>
     <h1>Telemetry Anomalies</h1>
+    <form method="post" action="/api/generate-test-data" style="margin-bottom: 1rem;">
+      <button type="submit">Generate Fresh Test Data</button>
+    </form>
     <p class="small">Total rows: {{ stats.total }} — Anomalies: {{ stats.n_anomalies }} ({{ stats.anomaly_pct }}%)</p>
 
     {% if rows %}

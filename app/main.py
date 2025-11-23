@@ -1,7 +1,10 @@
 """FastAPI web app exposing telemetry anomalies and a simple dashboard."""
 from pathlib import Path
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from pipeline.ingest import run_ingest
+from pipeline.process import run_process
+from pipeline.model import run_model
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import pandas as pd
@@ -73,3 +76,22 @@ def index(request: Request, limit: int = 200):
     stats = {"total": total, "n_anomalies": n_anom, "anomaly_pct": round(pct, 3)}
     # Use the newer TemplateResponse signature: (request, template_name, context)
     return templates.TemplateResponse(request, "index.html", {"rows": rows, "stats": stats})
+
+
+@app.post("/api/generate-test-data")
+def generate_test_data():
+    """
+    Regenerate synthetic telemetry and rerun the full anomaly pipeline.
+    Overwrites existing CSV, parquet, and DB files with fresh synthetic data.
+    """
+    try:
+        run_ingest()
+        run_process()
+        run_model()
+        # After regenerating, redirect back to the dashboard so the user sees new data
+        return RedirectResponse(url="/", status_code=303)
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "detail": str(e)},
+        )

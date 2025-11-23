@@ -48,30 +48,21 @@ def main(input_path: Path = RAW_CSV, output_path: Path = PROCESSED_PARQUET):
     logging.info("Writing processed telemetry to %s", output_path)
     df.to_parquet(output_path, index=False)
 
+def run_process(input_path: Path = RAW_CSV, output_path: Path = PROCESSED_PARQUET) -> Path:
+    """Run processing end-to-end and return the output parquet Path."""
+    main(input_path=input_path, output_path=output_path)
+    return output_path
+
+
+def _cli():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Process raw telemetry into engineered parquet")
+    parser.add_argument("--input", "-i", type=str, default=str(RAW_CSV), help="Input CSV path")
+    parser.add_argument("--output", "-o", type=str, default=str(PROCESSED_PARQUET), help="Output parquet path")
+    args = parser.parse_args()
+    run_process(input_path=Path(args.input), output_path=Path(args.output))
+
 
 if __name__ == "__main__":
-    main()
-# pipeline/process.py
-import pandas as pd
-from pathlib import Path
-
-DATA_DIR = Path("data")
-
-def load_raw() -> pd.DataFrame:
-    return pd.read_csv(DATA_DIR / "raw_telemetry.csv", parse_dates=["timestamp"])
-
-def add_features(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.sort_values(["flight_id", "timestamp"])
-    df["speed_diff"] = df.groupby("flight_id")["speed"].diff().fillna(0)
-    df["altitude_diff"] = df.groupby("flight_id")["altitude"].diff().fillna(0)
-    return df
-
-def process_and_save():
-    df = load_raw()
-    df = add_features(df)
-    out_path = DATA_DIR / "processed_telemetry.parquet"
-    df.to_parquet(out_path, index=False)
-    print(f"Saved processed telemetry to {out_path}")
-
-if __name__ == "__main__":
-    process_and_save()
+    _cli()
