@@ -1,125 +1,69 @@
-﻿# Intel Data Pipeline (Synthetic Telemetry)
-
-This project simulates an intelligence-style telemetry pipeline, performs anomaly detection with an IsolationForest, writes results to SQLite, and exposes a small FastAPI dashboard.
-
-Quick start (Windows / PowerShell):
-
-1. Create and activate a virtual environment
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-2. Install dependencies
-
-```powershell
-python -m pip install -r requirements.txt
-```
-
-3. Run the pipeline (or use the helper)
-
-```powershell
-python run_pipeline.py
-# or run steps individually:
-python pipeline\ingest.py
-python pipeline\process.py
-python pipeline\model.py
-```
-
-4. Run the FastAPI server
-
-```powershell
-uvicorn app.main:app --reload
-```
-
-Visit `http://127.0.0.1:8000/` for the dashboard and `http://127.0.0.1:8000/api/anomalies` for JSON.
-
-Files of interest:
-- `pipeline/ingest.py` — generate synthetic `data/raw_telemetry.csv`
-- `pipeline/process.py` — compute `speed_diff`, `altitude_diff` and write `data/processed_telemetry.parquet`
-- `pipeline/model.py` — train IsolationForest and write `data/intel.db` table `telemetry_anomalies`
-- `app/main.py` — FastAPI app and Jinja2 template at `app/templates/index.html`
-
-Running tests
----------------
-
-This project includes pytest tests under the `tests/` folder. To run them:
-
-```powershell
-python -m pip install -r requirements.txt
-python -m pip install pytest
-pytest -q
-```
-
-Docker (optional)
------------------
-
-Build the Docker image:
-
-```powershell
-docker build -t intel-data-pipeline .
-```
-
-Run the container (exposes port 8000):
-
-```powershell
-docker run --rm -p 8000:8000 intel-data-pipeline
-```
-
-# Intelligence Data Pipeline
-Language: Python 3.11
-
-Backend: FastAPI
-
-Data: Pandas, SQLite, Parquet
-
-ML: scikit-learn (IsolationForest)
-
-Testing: pytest, FastAPI TestClient
-
-CI/CD: GitHub Actions
-
-Frontend: Jinja2 templates + CSS
-
 # Intel-Style Telemetry Pipeline & Anomaly Detection
 
-[![CI](https://github.com/skyfly008/IntelligenceDataPipeline_Lewis/actions/workflows/tests.yml/badge.svg)](https://github.com/skyfly008/IntelligenceDataPipeline_Lewis/actions)
-[![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-API-green)](https://fastapi.tiangolo.com/)
+A self-contained, **intelligence-style data pipeline** that:
 
-A self-contained **intelligence-style data pipeline** that:
-
-- Generates synthetic **aircraft telemetry**
-- Performs **feature engineering** and **anomaly detection**
+- Generates **synthetic aircraft telemetry** for multiple flights
+- Performs **feature engineering** and **IsolationForest-based anomaly detection**
 - Stores scored results in **SQLite**
-- Exposes a **FastAPI** JSON API and an **HTML dashboard** for interactive analysis
-- Includes **tests** and **GitHub Actions CI**
+- Exposes:
+  - a **FastAPI JSON API** for anomalies
+  - an **HTML dashboard** that highlights anomalous rows
+- Includes **pytest tests** and **GitHub Actions CI**
 
-Designed to look and feel like the kind of telemetry / anomaly analysis tooling used in **defense, aerospace, and national security** environments.
+Designed to resemble the kind of telemetry / anomaly tooling used in **defense, aerospace, and national security** environments — but running entirely on synthetic data.
 
----
-
-## Features
-
-- Synthetic multi-flight telemetry generator (lat, lon, altitude, speed, heading, status)
-- Processing & feature engineering (`speed_diff`, `altitude_diff`, etc.)
-- IsolationForest-based anomaly detection with configurable contamination
-- Results stored in a local SQLite DB (`intel.db`, git-ignored)
-- FastAPI backend:
-  - `GET /` – HTML dashboard with anomaly highlighting
-  - `GET /api/anomalies` – JSON list of detected anomalies
-- Pytest-based tests for:
-  - Ingestion
-  - Processing
-  - Modeling
-  - API routes
-- GitHub Actions CI to run tests on push/PR
-- `.gitignore` configured to **exclude all data files** (`data/*.db`, `*.csv`, `*.parquet`)
+> 🔐 **Data & Security:**  
+> All telemetry is **fully synthetic**. No real-world or sensitive data is used.  
+> `data/*.db`, `*.csv`, and `*.parquet` are **ignored by git** and generated at runtime.
 
 ---
 
-## Architecture
+## 🔎 Project Overview
+
+This project simulates an end-to-end pipeline you might see in a monitoring or intel setting:
+
+1. **Ingest** – generate synthetic telemetry for multiple flights over time.
+2. **Process** – clean and feature-engineer the data (speed/altitude deltas).
+3. **Model** – train an **IsolationForest** to detect anomalous behavior.
+4. **Serve** – expose the results through a **FastAPI** app with:
+   - `/` → HTML dashboard
+   - `/api/anomalies` → JSON API
+
+It’s deliberately small but engineered with “real project” practices:
+- clear package layout
+- tests
+- CI workflow
+- Dockerfile
+- environment-agnostic paths
+
+---
+
+## 🧱 Features
+
+- **Synthetic telemetry generator**
+  - Multiple `flight_id` values
+  - Columns like: `timestamp`, `flight_id`, `lat`, `lon`, `altitude`, `speed`, `heading`, `status`
+- **Feature engineering**
+  - Per-flight `speed_diff`, `altitude_diff`
+  - Sorted time series per flight
+- **Anomaly detection**
+  - IsolationForest (configurable contamination)
+  - Outputs `anomaly_score`, `model_label`, and `model_is_anomaly` flags
+- **Storage**
+  - SQLite database at `data/intel.db`
+  - Table: `telemetry_anomalies`
+- **FastAPI app**
+  - `GET /` – HTML dashboard with summary stats and anomaly highlighting
+  - `GET /api/anomalies?limit=100` – top-N most anomalous rows as JSON
+- **Tests & CI**
+  - `tests/` for ingest, process, model, and app
+  - GitHub Actions workflow runs pipeline + tests on push/PR
+- **Docker support**
+  - Dockerfile for containerized deployment
+
+---
+
+## 🏗 Architecture
 
 ```text
 +-------------------+       +------------------+       +------------------------+
@@ -127,21 +71,18 @@ Designed to look and feel like the kind of telemetry / anomaly analysis tooling 
 |  Generate         | ----> |  Clean &         | ----> |  Train IsolationForest |
 |  raw_telemetry.csv|       |  Feature-Engineer|       |  Score anomalies       |
 +-------------------+       +------------------+       +------------------------+
-                                                                |
-                                                                v
-                                                        +----------------+
-                                                        |  intel.db      |
-                                                        |  telemetry_    |
-                                                        |  anomalies     |
-                                                        +----------------+
-                                                                |
-                                      +-------------------------+----------------------+
-                                      |                                                |
-                                      v                                                v
-                            +-------------------+                           +---------------------+
-                            |  FastAPI UI (/)   |                           | FastAPI JSON API    |
-                            |  HTML Dashboard   |                           | /api/anomalies      |
-                            +-------------------+                           +---------------------+
-
-
-
+                                                                   |
+                                                                   v
+                                                           +----------------+
+                                                           |  intel.db      |
+                                                           |  telemetry_    |
+                                                           |  anomalies     |
+                                                           +----------------+
+                                                                   |
+                            +--------------------------------------+-------------------------------+
+                            |                                                                      |
+                            v                                                                      v
+                  +----------------------------+                                   +----------------------------+
+                  |  FastAPI UI (GET /)        |                                   | FastAPI JSON API           |
+                  |  HTML Dashboard + Summary  |                                   | GET /api/anomalies         |
+                  +----------------------------+                                   +----------------------------+
